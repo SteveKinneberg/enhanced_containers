@@ -1,0 +1,2 @@
+CompileFlags:
+  Remove: -fprofile-abs-path # Suppress clangd LSP warning when building with code coverage.
