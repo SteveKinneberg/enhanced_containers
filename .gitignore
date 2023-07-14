@@ -7,3 +7,6 @@
 
 # Ignore build directories
 *build*/
+
+# Ignore cland cache
+.cache/
