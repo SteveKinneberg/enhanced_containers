@@ -20,59 +20,51 @@
 #include "mock_c_lib.h"
 
 #include "mock_memory.h"
+
 #include <memory>
 
 namespace real {
-int   (*mlock)(const void*, std::size_t){};
-int   (*munlock)(const void*, std::size_t){};
+int (*mlock)(const void*, std::size_t){};
+int (*munlock)(const void*, std::size_t){};
 void* (*memset)(void*, int, std::size_t){};
-}
+}    // namespace real
 
 namespace {
-void bind_real()
-{
+void bind_real() {
     if (!real::mlock) {
-        real::mlock   = reinterpret_cast<int   (*)(const void*, std::size_t)>(dlsym(RTLD_NEXT, "mlock"));
-        real::munlock = reinterpret_cast<int   (*)(const void*, std::size_t)>(dlsym(RTLD_NEXT, "munlock"));
-        real::memset  = reinterpret_cast<void* (*)(void*, int, std::size_t)> (dlsym(RTLD_NEXT, "memset"));
+        real::mlock =
+            reinterpret_cast<int (*)(const void*, std::size_t)>(dlsym(RTLD_NEXT, "mlock"));
+        real::munlock =
+            reinterpret_cast<int (*)(const void*, std::size_t)>(dlsym(RTLD_NEXT, "munlock"));
+        real::memset =
+            reinterpret_cast<void* (*)(void*, int, std::size_t)>(dlsym(RTLD_NEXT, "memset"));
     }
 }
-}
-
+}    // namespace
 
 namespace mock {
 
 std::shared_ptr<c_lib> c_lib::_self;
 
-std::shared_ptr<c_lib> c_lib::get_instance()
-{
-    if (!_self) {
-        _self.reset(new c_lib{});
-    }
+std::shared_ptr<c_lib> c_lib::get_instance() {
+    if (!_self) { _self.reset(new c_lib{}); }
     return _self;
 }
 
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
-int c_lib::mock_mlock(const void* addr, std::size_t len) noexcept
-{
+int c_lib::mock_mlock(const void* addr, std::size_t len) noexcept {
     bind_real();
-    if (_self && memory::get_instance()->is_mock_memory(addr)) {
-        return _self->mlock(addr, len);
-    }
+    if (_self && memory::get_instance()->is_mock_memory(addr)) { return _self->mlock(addr, len); }
     return real::mlock(addr, len);
 }
 
-int c_lib::mock_munlock(const void* addr, std::size_t len) noexcept
-{
+int c_lib::mock_munlock(const void* addr, std::size_t len) noexcept {
     bind_real();
-    if (_self && memory::get_instance()->is_mock_memory(addr)) {
-        return _self->munlock(addr, len);
-    }
+    if (_self && memory::get_instance()->is_mock_memory(addr)) { return _self->munlock(addr, len); }
     return real::munlock(addr, len);
 }
 
-void* c_lib::mock_memset(void* s, int c, std::size_t n) noexcept
-{
+void* c_lib::mock_memset(void* s, int c, std::size_t n) noexcept {
     bind_real();
     if (_self && memory::get_instance()->is_mock_memory(s)) {
         real::memset(s, c, n);
@@ -82,27 +74,17 @@ void* c_lib::mock_memset(void* s, int c, std::size_t n) noexcept
 }
 #endif
 
-} // namespace mock
+}    // namespace mock
 
 
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
 
 extern "C" {
 
-int mlock(const void* addr, std::size_t len)
-{
-    return mock::c_lib::mock_mlock(addr, len);
-}
+int mlock(const void* addr, std::size_t len) { return mock::c_lib::mock_mlock(addr, len); }
 
-int munlock(const void* addr, std::size_t len)
-{
-    return mock::c_lib::mock_munlock(addr, len);
-}
+int munlock(const void* addr, std::size_t len) { return mock::c_lib::mock_munlock(addr, len); }
 
-void* memset(void* s, int c, std::size_t n)
-{
-    return mock::c_lib::mock_memset(s, c, n);
-}
-
+void* memset(void* s, int c, std::size_t n) { return mock::c_lib::mock_memset(s, c, n); }
 }
 #endif

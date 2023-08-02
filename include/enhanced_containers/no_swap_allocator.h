@@ -21,6 +21,7 @@
 #pragma once
 
 #include <enhanced_containers/details/common.h>
+
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -84,8 +85,7 @@ class no_swap_allocator_state {
      * @param ptr   Pointer to the newly allocated memory.
      * @param len   Number of bytes in the newly allocated memory.
      */
-    void serialized_add_allocation(void* ptr, std::size_t len)
-    {
+    void serialized_add_allocation(void* ptr, std::size_t len) {
         std::lock_guard lk{_mutex};
         add_allocation(ptr, len);
     }
@@ -100,8 +100,7 @@ class no_swap_allocator_state {
      * @param ptr   Pointer to the memory being deallocated.
      * @param len   Number of bytes in the memory being deallocated.
      */
-    void serialized_remove_allocation(void* ptr, std::size_t len)
-    {
+    void serialized_remove_allocation(void* ptr, std::size_t len) {
         std::lock_guard lk{_mutex};
         remove_allocation(ptr, len);
     }
@@ -168,7 +167,7 @@ class no_swap_allocator_state {
     friend class unserialized_no_swap_allocator;
 };
 
-} // namespace details
+}    // namespace details
 
 /**
  * @brief
@@ -180,7 +179,9 @@ class no_swap_allocator_state {
  *
  * @code
  * if (condition) {
- *     std::basic_string<char, std::char_traits<char>, ec::unserialized_no_swap_allocator<char>> password = read_from_console();
+ *     using no_swap_string = std::basic_string<char, std::char_traits<char>,
+ *                                              ec::unserialized_no_swap_allocator<char>>;
+ *     no_swap_string password = read_from_console();
  *     // password locked to RAM.
  *     process_password(password);  // Takes a std::string_view.
  *  }  // password destroyed - memory can be swapped again.
@@ -212,9 +213,11 @@ struct unserialized_no_swap_allocator {
     /// @brief Type alias for the type representing the distance between pointers.
     using difference_type = typename upstream_traits::difference_type;
     /// @brief Compile-time indication about how to handle the allocator when copying containers.
-    using propagate_on_container_copy_assignment = typename upstream_traits::propagate_on_container_copy_assignment;
+    using propagate_on_container_copy_assignment =
+        typename upstream_traits::propagate_on_container_copy_assignment;
     /// @brief Compile-time indication about how to handle the allocator when moving containers.
-    using propagate_on_container_move_assignment = typename upstream_traits::propagate_on_container_move_assignment;
+    using propagate_on_container_move_assignment =
+        typename upstream_traits::propagate_on_container_move_assignment;
     /// @brief Compile-time indication about how to handle the allocator when swapping containers.
     using propagate_on_container_swap = typename upstream_traits::propagate_on_container_swap;
     /**
@@ -231,7 +234,8 @@ struct unserialized_no_swap_allocator {
     template <typename U, typename... Us>
     struct rebind {
         /// @brief The rebound allocator type.
-        using other = unserialized_no_swap_allocator<U, typename upstream_traits::template rebind_alloc<U, Us...>>;
+        using other = unserialized_no_swap_allocator<
+            U, typename upstream_traits::template rebind_alloc<U, Us...>>;
     };
 
     /// @brief Default constructor.
@@ -251,8 +255,7 @@ struct unserialized_no_swap_allocator {
      */
     template <typename... Ts>
     unserialized_no_swap_allocator(unserialized_no_swap_allocator<Ts...>&& other):
-        _upstream_allocator(std::move(other._upstream_allocator))
-    {}
+        _upstream_allocator(std::move(other._upstream_allocator)) {}
 
     /**
      * @brief
@@ -264,8 +267,7 @@ struct unserialized_no_swap_allocator {
      */
     template <typename... Ts>
     unserialized_no_swap_allocator(const unserialized_no_swap_allocator<Ts...>& other):
-        _upstream_allocator(other._upstream_allocator)
-    {}
+        _upstream_allocator(other._upstream_allocator) {}
 
     /**
      * @brief
@@ -276,8 +278,7 @@ struct unserialized_no_swap_allocator {
      * @return  Address of the allocated memory.
      */
     EC_NODISCARD
-    T* allocate(std::size_t len)
-    {
+    T* allocate(std::size_t len) {
         T* ptr = _upstream_allocator.allocate(len);
         _state->add_allocation(ptr, len * sizeof(T));
         return ptr;
@@ -293,8 +294,7 @@ struct unserialized_no_swap_allocator {
      * @return  Address of the allocated memory.
      */
     EC_NODISCARD
-    auto allocate_at_least(std::size_t len)
-    {
+    auto allocate_at_least(std::size_t len) {
         auto r = _upstream_allocator.allocate_at_least(len);
         _state->add_allocation(r.ptr, r.count);
         return r;
@@ -311,16 +311,17 @@ struct unserialized_no_swap_allocator {
      * @param ptr   Address of the memory to be deallcoated.
      * @param len   Number of type T to deallocate.
      */
-    void deallocate(T* ptr, std::size_t len)
-    {
+    void deallocate(T* ptr, std::size_t len) {
         _state->remove_allocation(ptr, len * sizeof(T));
         _upstream_allocator.deallocate(ptr, len);
     }
 
   private:
     /// @brief Shared pointer to the allocated pages state.
-    std::shared_ptr<details::no_swap_allocator_state> _state{details::no_swap_allocator_state::get_state_object()};
-    upstream_allocator _upstream_allocator{};    ///< @brief The real allocator that will manage the actual memory allocations.
+    std::shared_ptr<details::no_swap_allocator_state> _state{
+        details::no_swap_allocator_state::get_state_object()};
+    upstream_allocator _upstream_allocator{};    ///< @brief The real allocator that will manage the
+                                                 ///< actual memory allocations.
 
     template <typename, typename>
     friend class unserialized_no_swap_allocator;
@@ -336,7 +337,9 @@ struct unserialized_no_swap_allocator {
  *
  * @code
  * if (condition) {
- *     std::basic_string<char, std::char_traits<char>, ec::serialized_no_swap_allocator<char>> password = read_from_console();
+ *     using no_swap_string = std::basic_string<char, std::char_traits<char>,
+ *                                              ec::serialized_no_swap_allocator<char>>;
+ *     no_swap_string password = read_from_console();
  *     // password locked to RAM.
  *     process_password(password);  // Takes a std::string_view.
  *  }  // password destroyed - memory can be swapped again.
@@ -368,9 +371,11 @@ struct serialized_no_swap_allocator {
     /// @brief Type alias for the type representing the distance between pointers.
     using difference_type = typename upstream_traits::difference_type;
     /// @brief Compile-time indication about how to handle the allocator when copying containers.
-    using propagate_on_container_copy_assignment = typename upstream_traits::propagate_on_container_copy_assignment;
+    using propagate_on_container_copy_assignment =
+        typename upstream_traits::propagate_on_container_copy_assignment;
     /// @brief Compile-time indication about how to handle the allocator when moving containers.
-    using propagate_on_container_move_assignment = typename upstream_traits::propagate_on_container_move_assignment;
+    using propagate_on_container_move_assignment =
+        typename upstream_traits::propagate_on_container_move_assignment;
     /// @brief Compile-time indication about how to handle the allocator when swapping containers.
     using propagate_on_container_swap = typename upstream_traits::propagate_on_container_swap;
     /**
@@ -387,7 +392,8 @@ struct serialized_no_swap_allocator {
     template <typename U>
     struct rebind {
         /// @brief The rebound allocator type.
-        using other = serialized_no_swap_allocator<U, typename upstream_traits::template rebind_alloc<U>>;
+        using other =
+            serialized_no_swap_allocator<U, typename upstream_traits::template rebind_alloc<U>>;
     };
 
     /// @brief Default constructor.
@@ -407,8 +413,7 @@ struct serialized_no_swap_allocator {
      */
     template <typename U>
     serialized_no_swap_allocator(serialized_no_swap_allocator<U>&& other):
-        _upstream_allocator(std::move(other._upstream_allocator))
-    {}
+        _upstream_allocator(std::move(other._upstream_allocator)) {}
 
     /**
      * @brief
@@ -420,8 +425,7 @@ struct serialized_no_swap_allocator {
      */
     template <typename U>
     serialized_no_swap_allocator(const serialized_no_swap_allocator<U>& other):
-        _upstream_allocator(other._upstream_allocator)
-    {}
+        _upstream_allocator(other._upstream_allocator) {}
 
 #if __has_cpp_attribute(nodiscard)
     /**
@@ -432,10 +436,9 @@ struct serialized_no_swap_allocator {
      *
      * @return  Address of the allocated memory.
      */
-    [[nodiscard]]
+    EC_NODISCARD
 #endif
-    T* allocate(std::size_t len)
-    {
+    T* allocate(std::size_t len) {
         T* ptr = _upstream_allocator.allocate(len);
         _state->serialized_add_allocation(ptr, len * sizeof(T));
         return ptr;
@@ -451,10 +454,9 @@ struct serialized_no_swap_allocator {
      */
 #if defined(__cpp_lib_allocate_at_least)
 #if __has_cpp_attribute(nodiscard)
-    [[nodiscard]]
+    EC_NODISCARD
 #endif
-    auto* allocate_at_least(std::size_t len)
-    {
+    auto* allocate_at_least(std::size_t len) {
         auto r = _upstream_allocator.allocate_at_least(len);
         _state->serialized_add_allocation(r.ptr, r.count);
         return r;
@@ -471,19 +473,20 @@ struct serialized_no_swap_allocator {
      * @param ptr   Address of the memory to be deallcoated.
      * @param len   Number of type T to deallocate.
      */
-    void deallocate(T* ptr, std::size_t len)
-    {
+    void deallocate(T* ptr, std::size_t len) {
         _state->serialized_remove_allocation(ptr, len * sizeof(T));
         _upstream_allocator.deallocate(ptr, len);
     }
 
   private:
     /// @brief Shared pointer to the allocated pages state.
-    std::shared_ptr<details::no_swap_allocator_state> _state{details::no_swap_allocator_state::get_state_object()};
-    upstream_allocator _upstream_allocator{};    ///< @brief The real allocator that will manage the actual memory allocations.
+    std::shared_ptr<details::no_swap_allocator_state> _state{
+        details::no_swap_allocator_state::get_state_object()};
+    upstream_allocator _upstream_allocator{};    ///< @brief The real allocator that will manage the
+                                                 ///< actual memory allocations.
 
     template <typename, typename>
     friend class serialized_no_swap_allocator;
 };
 
-} // namespace ec
+}    // namespace ec

@@ -20,21 +20,23 @@
 #pragma once
 
 #include <enhanced_containers/secure_allocator.h>
+
 #include <string>
 
 namespace ec::unserialized_secure {
 /**
  * @brief
- * Alias of `std::basic_string<>` that wraps the real alloctor with `ec::unserialized_secure_allocator<>`.
+ * Alias of `std::basic_string<>` that wraps the real alloctor with
+ * `ec::unserialized_secure_allocator<>`.
  *
  * @tparam CharT        The character type.
  * @tparam Traits       The character type traits (default: `std::char_traits<CharT>`).
  * @tparam Allocator    The real allocator (default: `std:allocator<CharT>`).
  */
-template <typename CharT,
-          typename Traits = std::char_traits<CharT>,
+template <typename CharT, typename Traits = std::char_traits<CharT>,
           typename Allocator = std::allocator<CharT>>
-using basic_string = std::basic_string<CharT, Traits, ec::unserialized_secure_allocator<CharT, Allocator>>;
+using basic_string =
+    std::basic_string<CharT, Traits, ec::unserialized_secure_allocator<CharT, Allocator>>;
 
 /// @brief Type alias for `char` strings using the `ec::unserialized_secure_allocator<>`.
 using string = basic_string<char>;
@@ -46,21 +48,22 @@ using u8string = basic_string<char8_t>;
 using u16string = basic_string<char16_t>;
 /// @brief Type alias for `char32_t` strings using the `ec::unserialized_secure_allocator<>`.
 using u32string = basic_string<char32_t>;
-}
+}    // namespace ec::unserialized_secure
 
 namespace ec::serialized_secure {
 /**
  * @brief
- * Alias of `std::basic_string<>` that wraps the real alloctor with `ec::serialized_secure_allocator<>`.
+ * Alias of `std::basic_string<>` that wraps the real alloctor with
+ * `ec::serialized_secure_allocator<>`.
  *
  * @tparam CharT        The character type.
  * @tparam Traits       The character type traits (default: `std::char_traits<CharT>`).
  * @tparam Allocator    The real allocator (default: `std:allocator<CharT>`).
  */
-template <typename CharT,
-          typename Traits = std::char_traits<CharT>,
+template <typename CharT, typename Traits = std::char_traits<CharT>,
           typename Allocator = std::allocator<CharT>>
-using basic_string = std::basic_string<CharT, Traits, ec::serialized_secure_allocator<CharT, Allocator>>;
+using basic_string =
+    std::basic_string<CharT, Traits, ec::serialized_secure_allocator<CharT, Allocator>>;
 
 /// @brief Type alias for `char` strings using the `ec::serialized_secure_allocator<>`.
 using string = basic_string<char>;
@@ -72,5 +75,4 @@ using u8string = basic_string<char8_t>;
 using u16string = basic_string<char16_t>;
 /// @brief Type alias for `char32_t` strings using the `ec::serialized_secure_allocator<>`.
 using u32string = basic_string<char32_t>;
-}
-
+}    // namespace ec::serialized_secure

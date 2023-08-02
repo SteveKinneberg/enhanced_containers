@@ -41,4 +41,3 @@
 #else
 #define EC_NODISCARD
 #endif
-

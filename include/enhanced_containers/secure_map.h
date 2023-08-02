@@ -20,6 +20,7 @@
 #pragma once
 
 #include <enhanced_containers/secure_allocator.h>
+
 #include <map>
 
 namespace ec::unserialized_secure {
@@ -32,13 +33,11 @@ namespace ec::unserialized_secure {
  * @tparam Compare      The comparison functor type.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename T,
-          typename Compare = std::less<Key>,
+template <typename Key, typename T, typename Compare = std::less<Key>,
           typename Allocator = std::allocator<Key>>
 using map = std::map<Key, T, Compare,
                      ec::unserialized_secure_allocator<std::pair<const Key, T>, Allocator>>;
-}
+}    // namespace ec::unserialized_secure
 
 namespace ec::serialized_secure {
 /**
@@ -50,10 +49,8 @@ namespace ec::serialized_secure {
  * @tparam Compare      The comparison functor type.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename T,
-          typename Compare = std::less<Key>,
+template <typename Key, typename T, typename Compare = std::less<Key>,
           typename Allocator = std::allocator<Key>>
-using map = std::map<Key, T, Compare,
-                     ec::serialized_secure_allocator<std::pair<const Key, T>, Allocator>>;
-}
+using map =
+    std::map<Key, T, Compare, ec::serialized_secure_allocator<std::pair<const Key, T>, Allocator>>;
+}    // namespace ec::serialized_secure

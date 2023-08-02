@@ -20,6 +20,7 @@
 #pragma once
 
 #include <enhanced_containers/secure_allocator.h>
+
 #include <unordered_set>
 
 namespace ec::unserialized_secure {
@@ -33,13 +34,11 @@ namespace ec::unserialized_secure {
  * @tparam KeyEqual     The equal functor type for Key.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename Hash = std::hash<Key>,
-          typename KeyEqual = std::equal_to<Key>,
+template <typename Key, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>,
           typename Allocator = std::allocator<Key>>
-using unordered_multiset = std::unordered_multiset<Key, Hash, KeyEqual,
-                                                   ec::unserialized_secure_allocator<Key, Allocator>>;
-}
+using unordered_multiset =
+    std::unordered_multiset<Key, Hash, KeyEqual, ec::unserialized_secure_allocator<Key, Allocator>>;
+}    // namespace ec::unserialized_secure
 
 namespace ec::serialized_secure {
 /**
@@ -52,10 +51,8 @@ namespace ec::serialized_secure {
  * @tparam KeyEqual     The equal functor type for Key.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename Hash = std::hash<Key>,
-          typename KeyEqual = std::equal_to<Key>,
+template <typename Key, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>,
           typename Allocator = std::allocator<Key>>
-using unordered_multiset = std::unordered_multiset<Key, Hash, KeyEqual,
-                                                   ec::serialized_secure_allocator<Key, Allocator>>;
-}
+using unordered_multiset =
+    std::unordered_multiset<Key, Hash, KeyEqual, ec::serialized_secure_allocator<Key, Allocator>>;
+}    // namespace ec::serialized_secure

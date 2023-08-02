@@ -34,10 +34,7 @@ namespace {
  *
  * @return The number of bytes in a page of memory.
  */
-std::size_t get_page_size()
-{
-    return sysconf(_SC_PAGESIZE);
-}
+std::size_t get_page_size() { return sysconf(_SC_PAGESIZE); }
 
 /**
  * @brief
@@ -47,12 +44,9 @@ std::size_t get_page_size()
  * @param len   Number of bytes to lock.  Large enough values will actually cause multiple pages to
  *              be locked.
  */
-void pin_memory(const void* ptr, std::size_t len)
-{
+void pin_memory(const void* ptr, std::size_t len) {
     int r = mlock(ptr, len);
-    if (r != 0) {
-        throw std::system_error{errno, std::system_category(), "pinning memory"};
-    }
+    if (r != 0) { throw std::system_error{errno, std::system_category(), "pinning memory"}; }
 }
 
 /**
@@ -60,18 +54,14 @@ void pin_memory(const void* ptr, std::size_t len)
  * Linux implementation to unlock a page of memory from RAM (can be swapped out to disk).
  *
  * @param ptr   Pointer to memory in the page to unlock.
- * @param len   Number of bytes to unlock.  Large enough values will actually cause multiple pages to
- *              be unlocked.
+ * @param len   Number of bytes to unlock.  Large enough values will actually cause multiple pages
+ * to be unlocked.
  */
-void unpin_memory(const void* ptr, std::size_t len)
-{
+void unpin_memory(const void* ptr, std::size_t len) {
     int r = munlock(ptr, len);
-    if (r != 0) {
-        throw std::system_error{errno, std::system_category(), "unpinning memory"};
-    }
+    if (r != 0) { throw std::system_error{errno, std::system_category(), "unpinning memory"}; }
 }
-}
-
+}    // namespace
 
 
 #elif defined(_WIN32)
@@ -87,8 +77,7 @@ namespace {
  *
  * @return The number of bytes in a page of memory.
  */
-std::size_t get_page_size()
-{
+std::size_t get_page_size() {
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     return si.dwPageSize;
@@ -99,32 +88,26 @@ std::size_t get_page_size()
  * Microsoft Windows implementation to lock a page of memory to RAM (prevent from being swapped out
  * to disk).
  */
-void pin_memory(const void* ptr, std::size_t len)
-{
+void pin_memory(const void* ptr, std::size_t len) {
     auto r = VirtualLock(ptr, len);
-    if (r != 0) {
-        throw std::system_error(GetLastError(), "pinning memory");
-    }
+    if (r != 0) { throw std::system_error(GetLastError(), "pinning memory"); }
 }
 
 /**
  * @brief
- * Microsoft Windows implementation to unlock a page of memory from RAM (can be swapped out to disk).
+ * Microsoft Windows implementation to unlock a page of memory from RAM (can be swapped out to
+ * disk).
  */
-void unpin_memory(const void* ptr, std::size_t len)
-{
+void unpin_memory(const void* ptr, std::size_t len) {
     auto r = VirtualUnlock(ptr, len);
-    if (r != 0) {
-        throw std::system_error(GetLastError(), "pinning memory");
-    }
+    if (r != 0) { throw std::system_error(GetLastError(), "pinning memory"); }
 }
-}
+}    // namespace
 
 
 #elif defined(__APPLE__) && defined(__MACOS__)
 #error Not supported yet.
 #endif
-
 
 
 namespace ec {
@@ -134,21 +117,14 @@ namespace details {
 
 std::shared_ptr<no_swap_allocator_state> no_swap_allocator_state::_self{};
 
-std::shared_ptr<no_swap_allocator_state> no_swap_allocator_state::get_state_object()
-{
-    if (!_self) {
-        _self.reset(new no_swap_allocator_state{});
-    }
+std::shared_ptr<no_swap_allocator_state> no_swap_allocator_state::get_state_object() {
+    if (!_self) { _self.reset(new no_swap_allocator_state{}); }
     return _self;
 }
 
-no_swap_allocator_state::no_swap_allocator_state():
-    _page_size{get_page_size()}
-{}
+no_swap_allocator_state::no_swap_allocator_state(): _page_size{get_page_size()} {}
 
-
-void no_swap_allocator_state::add_allocation(void* ptr, std::size_t len)
-{
+void no_swap_allocator_state::add_allocation(void* ptr, std::size_t len) {
     auto bptr = reinterpret_cast<std::byte*>(ptr);
     auto page = to_page(bptr);
 
@@ -164,8 +140,7 @@ void no_swap_allocator_state::add_allocation(void* ptr, std::size_t len)
     }
 }
 
-void no_swap_allocator_state::remove_allocation(void* ptr, std::size_t len)
-{
+void no_swap_allocator_state::remove_allocation(void* ptr, std::size_t len) {
     auto bptr = reinterpret_cast<std::byte*>(ptr);
     auto page = to_page(bptr);
 
@@ -184,21 +159,17 @@ void no_swap_allocator_state::remove_allocation(void* ptr, std::size_t len)
     }
 }
 
-std::byte* no_swap_allocator_state::to_page(void* ptr)
-{
+std::byte* no_swap_allocator_state::to_page(void* ptr) {
     auto fake_buffer_size = 2 * _page_size;
-    auto ptr2 = ptr; // Make copy since std::align will modify it.
+    auto ptr2             = ptr;    // Make copy since std::align will modify it.
     auto page = reinterpret_cast<std::byte*>(std::align(_page_size, 1, ptr2, fake_buffer_size));
-    if (page > ptr) {
-        page -= _page_size;
-    }
+    if (page > ptr) { page -= _page_size; }
     return page;
 }
 
 
 #ifdef EC_UNIT_TEST_SUPPORT
-void no_swap_allocator_state::clear_pages(void* ptr, std::size_t len)
-{
+void no_swap_allocator_state::clear_pages(void* ptr, std::size_t len) {
     auto page = to_page(ptr);
 
     while (page < reinterpret_cast<std::byte*>(ptr) + len) {
@@ -207,8 +178,7 @@ void no_swap_allocator_state::clear_pages(void* ptr, std::size_t len)
     }
 }
 
-bool no_swap_allocator_state::is_lock_held()
-{
+bool no_swap_allocator_state::is_lock_held() {
     std::unique_lock lk{_mutex, std::try_to_lock};
     return !lk.owns_lock();
 }
@@ -216,7 +186,7 @@ bool no_swap_allocator_state::is_lock_held()
 #endif
 
 
-} // namespace detail
+}    // namespace details
 
 
-} // namespace ec
+}    // namespace ec

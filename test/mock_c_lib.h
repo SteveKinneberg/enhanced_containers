@@ -43,10 +43,10 @@
 
 #if defined(__linux__) || defined(__unix) || defined(__unix__)
 namespace real {
-extern int   (*mlock)  (const void*, std::size_t);
-extern int   (*munlock)(const void*, std::size_t);
-extern void* (*memset) (void*, int, std::size_t);
-}
+extern int (*mlock)(const void*, std::size_t);
+extern int (*munlock)(const void*, std::size_t);
+extern void* (*memset)(void*, int, std::size_t);
+}    // namespace real
 #endif
 
 namespace mock {
@@ -59,9 +59,9 @@ struct c_lib {
     static int   mock_munlock(const void* addr, std::size_t len) noexcept;
     static void* mock_memset(void* s, int c, std::size_t n) noexcept;
 
-    MOCK_METHOD(int,   mlock,   (const void* addr, std::size_t len), (noexcept));
-    MOCK_METHOD(int,   munlock, (const void* addr, std::size_t len), (noexcept));
-    MOCK_METHOD(void*, memset,  (void* s, int c, std::size_t n),     (noexcept));
+    MOCK_METHOD(int, mlock, (const void* addr, std::size_t len), (noexcept));
+    MOCK_METHOD(int, munlock, (const void* addr, std::size_t len), (noexcept));
+    MOCK_METHOD(void*, memset, (void* s, int c, std::size_t n), (noexcept));
 
 #elif defined(_WIN32)
 #elif defined(__APPLE__) && defined(__MACOS__)
@@ -74,4 +74,4 @@ struct c_lib {
     c_lib() = default;
 };
 
-} // namespace mock
+}    // namespace mock

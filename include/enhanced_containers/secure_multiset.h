@@ -20,22 +20,22 @@
 #pragma once
 
 #include <enhanced_containers/secure_allocator.h>
+
 #include <set>
 
 namespace ec::unserialized_secure {
 /**
  * @brief
- * Alias of `std::multiset<>` that wraps the real alloctor with `ec::unserialized_secure_allocator<>`.
+ * Alias of `std::multiset<>` that wraps the real alloctor with
+ * `ec::unserialized_secure_allocator<>`.
  *
  * @tparam Key          The key type stored in the multiset.
  * @tparam Compare      The comparison functor type.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename Compare = std::less<Key>,
-          typename Allocator = std::allocator<Key>>
+template <typename Key, typename Compare = std::less<Key>, typename Allocator = std::allocator<Key>>
 using multiset = std::multiset<Key, Compare, ec::unserialized_secure_allocator<Key, Allocator>>;
-}
+}    // namespace ec::unserialized_secure
 
 namespace ec::serialized_secure {
 /**
@@ -46,9 +46,6 @@ namespace ec::serialized_secure {
  * @tparam Compare      The comparison functor type.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename Compare = std::less<Key>,
-          typename Allocator = std::allocator<Key>>
+template <typename Key, typename Compare = std::less<Key>, typename Allocator = std::allocator<Key>>
 using multiset = std::multiset<Key, Compare, ec::serialized_secure_allocator<Key, Allocator>>;
-}
-
+}    // namespace ec::serialized_secure

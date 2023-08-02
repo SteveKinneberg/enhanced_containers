@@ -26,44 +26,27 @@ namespace mock {
 
 std::shared_ptr<memory> memory::_self;
 
-std::shared_ptr<memory> memory::get_instance()
-{
-    if (!_self) {
-        _self.reset(new memory{});
-    }
+std::shared_ptr<memory> memory::get_instance() {
+    if (!_self) { _self.reset(new memory{}); }
     return _self;
 }
 
-void* memory::acquire(std::size_t n)
-{
-    if (_next_allocation_offset + n > _memory.size()) {
-        throw std::bad_alloc{};
-    }
+void* memory::acquire(std::size_t n) {
+    if (_next_allocation_offset + n > _memory.size()) { throw std::bad_alloc{}; }
     auto* r = &_memory[_next_allocation_offset];
     _next_allocation_offset += n;
     return r;
 }
 
-void memory::reset()
-{
-    _next_allocation_offset = 0;
-}
+void memory::reset() { _next_allocation_offset = 0; }
 
-void memory::set_next_allocation_offset(std::size_t offset)
-{
-    _next_allocation_offset = offset;
-}
+void memory::set_next_allocation_offset(std::size_t offset) { _next_allocation_offset = offset; }
 
-void memory::fill(std::byte v)
-{
-    std::fill(_memory.begin(), _memory.end(), v);
-}
+void memory::fill(std::byte v) { std::fill(_memory.begin(), _memory.end(), v); }
 
-
-bool memory::is_mock_memory(const void* ptr) const
-{
+bool memory::is_mock_memory(const void* ptr) const {
     auto* bptr = reinterpret_cast<const std::byte*>(ptr);
     return (bptr >= _memory.data()) && ((bptr - _memory.data()) < _memory.size());
 }
 
-}
+}    // namespace mock

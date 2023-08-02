@@ -19,8 +19,9 @@
 
 #pragma once
 
-#include <algorithm>
 #include <enhanced_containers/details/common.h>
+
+#include <algorithm>
 #include <memory>
 
 #if __cplusplus >= 201603L
@@ -36,9 +37,11 @@ namespace ec {
  *
  * @code
  * if (condition) {
- *     std::basic_string<char, std::char_traits<char>, ec::zero_on_release_allocator<char>> data = read_from_console();
+ *     using zero_on_release_string =  std::basic_string<char, std::char_traits<char>,
+ *                                                       ec::zero_on_release_allocator<char>>;
+ *     zero_on_release_string data = read_from_console();
  *     process_data(data);  // Takes a std::string_view.
- *  }  // data destroyed - memory automatically zeroed out here.
+ * }  // data destroyed - memory automatically zeroed out here.
  * @endcode
  *
  * Important note: Some care must be taken with certain containers.  For example, `std::string` is
@@ -67,9 +70,11 @@ struct zero_on_release_allocator {
     /// @brief Type alias for the type representing the distance between pointers.
     using difference_type = typename upstream_traits::difference_type;
     /// @brief Compile-time indication about how to handle the allocator when copying containers.
-    using propagate_on_container_copy_assignment = typename upstream_traits::propagate_on_container_copy_assignment;
+    using propagate_on_container_copy_assignment =
+        typename upstream_traits::propagate_on_container_copy_assignment;
     /// @brief Compile-time indication about how to handle the allocator when moving containers.
-    using propagate_on_container_move_assignment = typename upstream_traits::propagate_on_container_move_assignment;
+    using propagate_on_container_move_assignment =
+        typename upstream_traits::propagate_on_container_move_assignment;
     /// @brief Compile-time indication about how to handle the allocator when swapping containers.
     using propagate_on_container_swap = typename upstream_traits::propagate_on_container_swap;
     /**
@@ -86,7 +91,8 @@ struct zero_on_release_allocator {
     template <typename U, typename... Us>
     struct rebind {
         /// @brief The rebound allocator type.
-        using other = zero_on_release_allocator<U, typename upstream_traits::template rebind_alloc<U, Us...>>;
+        using other =
+            zero_on_release_allocator<U, typename upstream_traits::template rebind_alloc<U, Us...>>;
     };
 
     /// @brief Default constructor.
@@ -106,8 +112,7 @@ struct zero_on_release_allocator {
      */
     template <typename... Ts>
     zero_on_release_allocator(zero_on_release_allocator<Ts...>&& other):
-        _upstream_allocator(std::move(other._upstream_allocator))
-    {}
+        _upstream_allocator(std::move(other._upstream_allocator)) {}
 
     /**
      * @brief
@@ -119,8 +124,7 @@ struct zero_on_release_allocator {
      */
     template <typename... Ts>
     zero_on_release_allocator(const zero_on_release_allocator<Ts...>& other):
-        _upstream_allocator(other._upstream_allocator)
-    {}
+        _upstream_allocator(other._upstream_allocator) {}
 
     /**
      * @brief
@@ -130,9 +134,10 @@ struct zero_on_release_allocator {
      *
      * @return  Address of the allocated memory.
      */
-    EC_NODISCARD EC_CONSTEXPR_ALLOC
-    T* allocate(std::size_t len)
-    {
+    EC_NODISCARD
+
+    EC_CONSTEXPR_ALLOC
+    T* allocate(std::size_t len) {
         T* ptr = _upstream_allocator.allocate(len);
         return ptr;
     }
@@ -149,11 +154,10 @@ struct zero_on_release_allocator {
      *
      * @return  Address of the allocated memory.
      */
-    EC_NODISCARD EC_CONSTEXPR_ALLOC
-    auto allocate_at_least(std::size_t len)
-    {
-        return _upstream_allocator.allocate_at_least(len);
-    }
+    EC_NODISCARD
+
+    EC_CONSTEXPR_ALLOC
+    auto allocate_at_least(std::size_t len) { return _upstream_allocator.allocate_at_least(len); }
 #endif
 
     /**
@@ -164,20 +168,18 @@ struct zero_on_release_allocator {
      * @param len   Number of type T to deallocate.
      */
     EC_CONSTEXPR_ALLOC
-    void deallocate(T* ptr, std::size_t len)
-    {
-        std::fill(reinterpret_cast<std::uint8_t*>(ptr),
-                  reinterpret_cast<std::uint8_t*>(ptr + len),
+    void deallocate(T* ptr, std::size_t len) {
+        std::fill(reinterpret_cast<std::uint8_t*>(ptr), reinterpret_cast<std::uint8_t*>(ptr + len),
                   0);
         _upstream_allocator.deallocate(ptr, len);
     }
 
   private:
-    upstream_allocator _upstream_allocator{};    ///< @brief The real allocator that will manage the actual memory allocations.
+    upstream_allocator _upstream_allocator{};    ///< @brief The real allocator that will manage the
+                                                 /// actual memory allocations.
 
     template <typename, typename>
     friend class zero_on_release_allocator;
 };
 
-
-} // namespace ec
+}    // namespace ec

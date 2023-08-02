@@ -20,12 +20,14 @@
 #pragma once
 
 #include <enhanced_containers/secure_allocator.h>
+
 #include <unordered_map>
 
 namespace ec::unserialized_secure {
 /**
  * @brief
- * Alias of `std::unordered_multimap<>` that wraps the real alloctor with `ec::unserialized_secure_allocator<>`.
+ * Alias of `std::unordered_multimap<>` that wraps the real alloctor with
+ * `ec::unserialized_secure_allocator<>`.
  *
  * @tparam Key          The key type stored in the unordered_multimap.
  * @tparam T            The value type stored in the unordered_multimap.
@@ -33,20 +35,18 @@ namespace ec::unserialized_secure {
  * @tparam KeyEqual     The equal functor type for Key.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename T,
-          typename Hash = std::hash<Key>,
-          typename KeyEqual = std::equal_to<Key>,
-          typename Allocator = std::allocator<Key>>
-using unordered_multimap = std::unordered_multimap<Key, T, Hash, KeyEqual,
-                                         ec::unserialized_secure_allocator<std::pair<const Key, T>,
-                                                                           Allocator>>;
-}
+template <typename Key, typename T, typename Hash = std::hash<Key>,
+          typename KeyEqual = std::equal_to<Key>, typename Allocator = std::allocator<Key>>
+using unordered_multimap =
+    std::unordered_multimap<Key, T, Hash, KeyEqual,
+                            ec::unserialized_secure_allocator<std::pair<const Key, T>, Allocator>>;
+}    // namespace ec::unserialized_secure
 
 namespace ec::serialized_secure {
 /**
  * @brief
- * Alias of `std::unordered_multimap<>` that wraps the real alloctor with `ec::serialized_secure_allocator<>`.
+ * Alias of `std::unordered_multimap<>` that wraps the real alloctor with
+ * `ec::serialized_secure_allocator<>`.
  *
  * @tparam Key          The value type stored in the unordered_multimap.
  * @tparam T            The value type stored in the unordered_multimap.
@@ -54,12 +54,9 @@ namespace ec::serialized_secure {
  * @tparam KeyEqual     The equal functor type for Key.
  * @tparam Allocator    The real allocator (default: `std:allocator<Key>`).
  */
-template <typename Key,
-          typename T,
-          typename Hash = std::hash<Key>,
-          typename KeyEqual = std::equal_to<Key>,
-          typename Allocator = std::allocator<Key>>
-using unordered_multimap = std::unordered_multimap<Key, T, Hash, KeyEqual,
-                                         ec::serialized_secure_allocator<std::pair<const Key, T>,
-                                                                         Allocator>>;
-}
+template <typename Key, typename T, typename Hash = std::hash<Key>,
+          typename KeyEqual = std::equal_to<Key>, typename Allocator = std::allocator<Key>>
+using unordered_multimap =
+    std::unordered_multimap<Key, T, Hash, KeyEqual,
+                            ec::serialized_secure_allocator<std::pair<const Key, T>, Allocator>>;
+}    // namespace ec::serialized_secure

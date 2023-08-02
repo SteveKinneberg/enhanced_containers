@@ -20,6 +20,7 @@
 #pragma once
 
 #include <enhanced_containers/secure_allocator.h>
+
 #include <list>
 
 namespace ec::unserialized_secure {
@@ -32,16 +33,16 @@ namespace ec::unserialized_secure {
  */
 template <typename T, typename Allocator = std::allocator<T>>
 using list = std::list<T, ec::unserialized_secure_allocator<T, Allocator>>;
-}
+}    // namespace ec::unserialized_secure
 
 namespace ec::serialized_secure {
 /**
  * @brief
- * Alias of `std::list<>` that wraps the real alloctor with `ec::unserialized_secure_allocator<>`.
+ * Alias of `std::list<>` that wraps the real alloctor with `ec::serialized_secure_allocator<>`.
  *
  * @tparam T            The value type stored in the list.
  * @tparam Allocator    The real allocator (default: `std:allocator<T>`).
  */
 template <typename T, typename Allocator = std::allocator<T>>
 using list = std::list<T, ec::serialized_secure_allocator<T, Allocator>>;
-}
+}    // namespace ec::serialized_secure

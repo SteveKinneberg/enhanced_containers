@@ -39,7 +39,9 @@ namespace ec {
  *
  * @code
  * if (condition) {
- *     std::basic_string<char, std::char_traits<char>, ec::unserialized_secure_allocator<char>> password = read_from_console();
+ *     using secure_string = std::basic_string<char, std::char_traits<char>,
+ *                                              ec::unserialized_secure_allocator<char>>;
+ *     secure_string password = read_from_console();
  *     // password locked to RAM.
  *     process_password(password);  // Takes a std::string_view.
  *  }  // password destroyed - memory automatically zeroed out here and can be swapped again.
@@ -56,7 +58,8 @@ namespace ec {
  * @tparam A    The actual allocator being wrapped.
  */
 template <typename T, typename A = std::allocator<T>>
-using serialized_secure_allocator = zero_on_release_allocator<T, serialized_no_swap_allocator<T, A>>;
+using serialized_secure_allocator =
+    zero_on_release_allocator<T, serialized_no_swap_allocator<T, A>>;
 
 /**
  * @brief
@@ -72,7 +75,9 @@ using serialized_secure_allocator = zero_on_release_allocator<T, serialized_no_s
  *
  * @code
  * if (condition) {
- *     std::basic_string<char, std::char_traits<char>, ec::unserialized_secure_allocator<char>> password = read_from_console();
+ *     using secure_string = std::basic_string<char, std::char_traits<char>,
+ *                                              ec::serialized_secure_allocator<char>>;
+ *     secure_string password = read_from_console();
  *     // password locked to RAM.
  *     process_password(password);  // Takes a std::string_view.
  *  }  // password destroyed - memory automatically zeroed out here and can be swapped again.
@@ -89,7 +94,8 @@ using serialized_secure_allocator = zero_on_release_allocator<T, serialized_no_s
  * @tparam A    The actual allocator being wrapped.
  */
 template <typename T, typename A = std::allocator<T>>
-using unserialized_secure_allocator = zero_on_release_allocator<T, unserialized_no_swap_allocator<T, A>>;
+using unserialized_secure_allocator =
+    zero_on_release_allocator<T, unserialized_no_swap_allocator<T, A>>;
 
 
-} // namespace ec
+}    // namespace ec

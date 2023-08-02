@@ -45,13 +45,15 @@ class memory {
     static constexpr std::size_t memory_size{1 << 16};
 
     static std::shared_ptr<memory> get_instance();
-    void* acquire(std::size_t n);
-    void reset();
-    void set_next_allocation_offset(std::size_t offset);
-    void fill(std::byte v = static_cast<std::byte>(0x5a));
+    void*                          acquire(std::size_t n);
+    void                           reset();
+    void                           set_next_allocation_offset(std::size_t offset);
+    void                           fill(std::byte v = static_cast<std::byte>(0x5a));
+
     void fill(std::uint8_t v) { fill(static_cast<std::byte>(v)); }
 
     auto& get_memory_array() { return _memory; }
+
     const auto& get_memory_array() const { return _memory; }
 
     bool is_mock_memory(const void* ptr) const;
@@ -60,12 +62,11 @@ class memory {
   private:
     static std::shared_ptr<memory> _self;
 
-    alignas(memory_size)
-    std::array<std::byte, memory_size> _memory;
+    alignas(memory_size) std::array<std::byte, memory_size> _memory;
     std::size_t _next_allocation_offset{};
 
     memory() = default;
 };
 
 
-} // namespace mock
+}    // namespace mock

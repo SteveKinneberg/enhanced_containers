@@ -22,12 +22,9 @@
 namespace mock {
 std::shared_ptr<allocation_monitor> allocation_monitor::_self;
 
-std::shared_ptr<allocation_monitor> allocation_monitor::get_instance()
-{
-    if (!_self) {
-        _self.reset(new allocation_monitor{});
-    }
+std::shared_ptr<allocation_monitor> allocation_monitor::get_instance() {
+    if (!_self) { _self.reset(new allocation_monitor{}); }
     return _self;
 }
 
-}
+}    // namespace mock
